@@ -839,10 +839,23 @@ class UVLoopToolsBase:
         def uv_key(uv):
             return (round(uv.x, 6), round(uv.y, 6))
 
+        # Blender 3.5+ moved UV vertex selection out of BMLoopUV into a hidden boolean
+        # loop attribute named ".vs.<uvmap>"; the old BMLoopUV.select was removed in 5.x.
+        # When "UV Sync Selection" is on, the UV editor follows the mesh selection instead.
+        if bpy.context.scene.tool_settings.use_uv_select_sync:
+            def is_uv_selected(loop):
+                return loop.vert.select
+        else:
+            uv_select_layer = bm.loops.layers.bool.get(".vs." + uv_layer.name)
+            if uv_select_layer is None:
+                return []
+            def is_uv_selected(loop):
+                return loop[uv_select_layer]
+
         uv_nodes = {} # (vert, uv_key) -> [loops]
         for face in bm.faces:
             for l in face.loops:
-                if l[uv_layer].select:
+                if is_uv_selected(l):
                     key = (l.vert, uv_key(l[uv_layer].uv))
                     if key not in uv_nodes:
                         uv_nodes[key] = []
