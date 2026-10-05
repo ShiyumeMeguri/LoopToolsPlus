@@ -17,7 +17,7 @@ class LOOPTOOLSPLUS_OT_mesh_linear(Operator):
     bl_idname = "looptools_plus.mesh_linear"
     bl_label = "Set Linear"
     bl_description = ("Line the selected vertices up between the two that lie farthest apart, "
-                      "evenly spaced in the order they already follow along that line")
+                      "each dropping straight onto that line")
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod

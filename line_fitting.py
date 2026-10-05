@@ -54,16 +54,15 @@ def linear_calculate_verts(locations):
     """
     New locations for the points between the two farthest apart, as (index, location) pairs.
 
-    Those two stay where they are. Every other point goes onto the segment between them, evenly
-    spaced in the order the points project onto it.
+    Those two stay where they are. Every other point drops straight onto the line through them and
+    keeps its own place along it, which always lies between the two.
     """
     points = numpy.asarray(locations, dtype=numpy.float64)
     start, end = farthest_pair(points)
     line = points[end] - points[start]
-    along = (points - points[start]) @ line
-    inner = [int(index) for index in numpy.argsort(along, kind="stable") if index != start and index != end]
-    steps = len(inner) + 1
+    fractions = (points - points[start]) @ line / (line @ line)
     moves = []
-    for rank, index in enumerate(inner, 1):
-        moves.append((index, points[start] + line * (rank / steps)))
+    for index, fraction in enumerate(fractions):
+        if index != start and index != end:
+            moves.append((index, points[start] + line * fraction))
     return moves

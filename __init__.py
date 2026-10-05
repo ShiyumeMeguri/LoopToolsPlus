@@ -1,7 +1,7 @@
 bl_info = {
     "name": "LoopTools Plus",
     "author": "ShiyumeMeguri",
-    "version": (0, 4, 0),
+    "version": (0, 4, 1),
     "blender": (5, 3, 0),
     "location": "Edit Mode Context Menu (W) / UV Editor Context Menu (W)",
     "description": "LoopTools functionality for Curves, UVs and mesh vertices",
