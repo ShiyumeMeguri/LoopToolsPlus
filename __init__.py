@@ -1,10 +1,10 @@
 bl_info = {
     "name": "LoopTools Plus",
     "author": "ShiyumeMeguri",
-    "version": (0, 3, 0),
+    "version": (0, 4, 0),
     "blender": (5, 3, 0),
     "location": "Edit Mode Context Menu (W) / UV Editor Context Menu (W)",
-    "description": "LoopTools functionality for Curves and UVs",
+    "description": "LoopTools functionality for Curves, UVs and mesh vertices",
     "warning": "",
     "doc_url": "",
     "category": "User",
@@ -13,11 +13,12 @@ bl_info = {
 import bpy
 
 from . import curve_operators
+from . import mesh_operators
 from . import uv_operators
 
 
 class LOOPTOOLSPLUS_MT_menu(bpy.types.Menu):
-    bl_label = "LoopTools"
+    bl_label = "LoopTools Plus"
     bl_idname = "LOOPTOOLSPLUS_MT_menu"
 
     def draw(self, context):
@@ -25,8 +26,14 @@ class LOOPTOOLSPLUS_MT_menu(bpy.types.Menu):
         if space and space.type == 'IMAGE_EDITOR':
             self.draw_uv(context)
             return
+        if context.mode == 'EDIT_MESH':
+            self.draw_mesh(context)
+            return
         if context.active_object and context.active_object.type == 'CURVE':
             self.draw_curve(context)
+
+    def draw_mesh(self, context):
+        self.layout.operator("looptools_plus.mesh_linear", text="Set Linear")
 
     def draw_uv(self, context):
         layout = self.layout
@@ -79,8 +86,13 @@ def menu_func(self, context):
     self.layout.menu("LOOPTOOLSPLUS_MT_menu")
 
 
+def menu_func_mesh(self, context):
+    if context.tool_settings.mesh_select_mode[0]:
+        menu_func(self, context)
+
+
 def registered_classes():
-    return curve_operators.classes + uv_operators.classes + (LOOPTOOLSPLUS_MT_menu,)
+    return curve_operators.classes + mesh_operators.classes + uv_operators.classes + (LOOPTOOLSPLUS_MT_menu,)
 
 
 def register():
@@ -88,6 +100,8 @@ def register():
         bpy.utils.register_class(cls)
     if hasattr(bpy.types, "VIEW3D_MT_edit_curve_context_menu"):
         bpy.types.VIEW3D_MT_edit_curve_context_menu.prepend(menu_func)
+    if hasattr(bpy.types, "VIEW3D_MT_edit_mesh_context_menu"):
+        bpy.types.VIEW3D_MT_edit_mesh_context_menu.prepend(menu_func_mesh)
     if hasattr(bpy.types, "IMAGE_MT_uvs_context_menu"):
         bpy.types.IMAGE_MT_uvs_context_menu.prepend(menu_func)
 
@@ -95,6 +109,8 @@ def register():
 def unregister():
     if hasattr(bpy.types, "IMAGE_MT_uvs_context_menu"):
         bpy.types.IMAGE_MT_uvs_context_menu.remove(menu_func)
+    if hasattr(bpy.types, "VIEW3D_MT_edit_mesh_context_menu"):
+        bpy.types.VIEW3D_MT_edit_mesh_context_menu.remove(menu_func_mesh)
     if hasattr(bpy.types, "VIEW3D_MT_edit_curve_context_menu"):
         bpy.types.VIEW3D_MT_edit_curve_context_menu.remove(menu_func)
     for cls in reversed(registered_classes()):
